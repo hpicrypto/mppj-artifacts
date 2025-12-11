@@ -1,0 +1,51 @@
+from util import if_else
+
+program.bit_length = 32
+
+def compute_intersection(a, b, aa, bb):
+	""" Naive quadratic private join.
+
+	Returns: secret Array with join for A (padded to len(a)), and
+	secret Array with join for B (padded to len(a))
+	secret Array of bits indicating whether Alice's input matches or not """
+	n = len(a)
+	if n != len(b):
+		raise CompilerError('Inconsistent lengths to compute_intersection')
+	intersection1 = Array(n, sint)
+	intersection2 = Array(n, sint)
+	is_match_at = Array(n, sint)
+
+	@for_range(n)
+	def _(i):
+		@for_range(n)
+		def _(j):
+			match = a[i] == b[j]
+			is_match_at[i] += match
+			intersection1[i] = if_else(match, aa[i], intersection1[i]) # match * a[i] + (1 - match) * intersection[i]
+			intersection2[i] = if_else(match, bb[i], intersection2[i]) # match * a[i] + (1 - match) * intersection[i]
+	return is_match_at, intersection1, intersection2
+	
+def set_intersection_example(n):
+	"""Naive private join on two Arrays, followed by computing the size"""
+	a_uid = Array(n, sint)
+	a_val = Array(n, sint)
+	b_uid = Array(n, sint)
+	b_val = Array(n, sint)
+	print_ln('Running Private Join example')
+	@for_range(n)
+	def _(i):
+		a_uid[i] = i
+		b_uid[i] = i + 20
+		a_val[i] = i + 1
+		b_val[i] = i + 2
+	is_match_at, intersection1, intersection2 = compute_intersection(a_uid,b_uid, a_val, b_val)
+
+	print_ln('Printing join as value tuples (0,0: not in join)')
+	size = MemValue(sint(0))
+	@for_range(n)
+	def _(i):
+		size.write(size + is_match_at[i])
+		print_str('%s %s, ', intersection1[i].reveal(), intersection2[i].reveal())
+	print_ln('\nIntersection size: %s', size.reveal())
+
+set_intersection_example(100)

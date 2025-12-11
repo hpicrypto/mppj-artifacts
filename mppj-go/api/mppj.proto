@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option go_package = "mppj/pb";
+
+package mppj_proto;
+
+service MPPJHelper {
+    rpc PushRows(stream EncRow) returns (Void);
+    rpc PullRows(Void) returns (stream EncRowWithHint);
+}
+
+message Void{}
+
+message EncRow {
+    bytes Data = 1;
+}
+
+message EncRowWithHint {
+    bytes Data = 1;
+}

@@ -1,0 +1,13 @@
+.venv
+.certs
+
+.devcontainer
+__pycache__
+
+setup/inventory.yml
+
+results-mpc.txt
+results-mppj.txt
+results.txt
+table2.txt
+table3.txt

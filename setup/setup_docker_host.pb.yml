@@ -1,0 +1,133 @@
+---
+- hosts: all
+  become: yes
+  vars:
+    docker_tls_dir: /etc/docker/tls
+  
+  tasks:
+    - name: Install aptitude
+      apt:
+        name: aptitude
+        state: latest
+        update_cache: true
+
+    - name: Update apt and install required system packages
+      apt:
+        pkg:
+          - nano
+          - git
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - python3-pip
+          - virtualenv
+          - python3-setuptools
+          - iperf3
+          - build-essential
+          - screen
+        state: latest
+        update_cache: true
+
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    - name: Update apt and install docker-ce
+      apt:
+        name: docker-ce
+        state: latest
+        update_cache: true
+
+    - name: Copy local requirements.txt to remote
+      ansible.builtin.copy:
+        src: requirements.txt   # local path
+        dest: /tmp/requirements.txt  # remote path
+        mode: '0644'
+
+    - name: Install Docker Modules for Python
+      pip:
+        break_system_packages: yes
+        requirements: /tmp/requirements.txt
+          
+    - name: Ensure parent TLS directory exists
+      file:
+        path: "{{ docker_tls_dir }}"
+        state: directory
+        owner: root
+        group: docker
+        mode: '0750'
+
+    - name: Upload CA certificate
+      copy:
+        src: ".certs/ca.pem"
+        dest: "{{ docker_tls_dir }}/ca.pem"
+        owner: root
+        group: docker
+        mode: '0644'
+
+    - name: Upload server certificate
+      copy:
+        src: ".certs/hosts/{{ inventory_hostname }}/server-cert.pem"
+        dest: "{{ docker_tls_dir }}/server-cert.pem"
+        owner: root
+        group: docker
+        mode: '0644'
+
+    - name: Upload server key
+      copy:
+        src: ".certs/hosts/{{ inventory_hostname }}/server-key.pem"
+        dest: "{{ docker_tls_dir }}/server-key.pem"
+        owner: root
+        group: docker
+        mode: '0640'
+
+    - name: Ensure systemd directory for dockerd override exists
+      file:
+        path: /etc/systemd/system/docker.service.d
+        state: directory
+        mode: '0755'
+
+    - name: Configure dockerd to use TLS and TCP socket
+      copy:
+        dest: /etc/systemd/system/docker.service.d/tls-override.conf
+        mode: '0644'
+        content: |
+          [Service]
+          ExecStart=
+          ExecStart=/usr/bin/dockerd \
+            --host=fd:// \
+            --host=tcp://0.0.0.0:2376 \
+            --tlsverify \
+            --tlscacert={{ docker_tls_dir }}/ca.pem \
+            --tlscert={{ docker_tls_dir }}/server-cert.pem \
+            --tlskey={{ docker_tls_dir }}/server-key.pem
+
+    - name: Reload systemd configuration
+      systemd:
+        daemon_reload: yes
+
+    - name: Restart Docker
+      systemd:
+        name: docker
+        state: restarted
+        enabled: yes
+
+    - name: Wait for Docker API to start
+      wait_for:
+        port: 2376
+        timeout: 20
+
+
+    - name: Clone the artifact repository
+      become: no
+      ansible.builtin.git:
+        repo: https://github.com/hpicrypto/mppj-artifacts.git
+        dest: ~/mppj-artifacts
+        recursive: yes

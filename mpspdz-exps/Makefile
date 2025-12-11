@@ -1,7 +1,7 @@
-.PHONY: mpspdz docker
+.PHONY: MP-SPDZ mpspdz docker
 
 MP-SPDZ:
-	git submodule init && git submodule update
+	git submodule update --init
 
 docker: mpspdz
 	docker build --tag mpspdz:exp .

@@ -1,13 +1,13 @@
-package common
+package cmd
 
 import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"mppj"
-	"mppj/api"
-	"mppj/cmd/config"
 	"time"
+
+	"github.com/hpicrypto/mppj"
+	"github.com/hpicrypto/mppj/api"
 )
 
 // this function simulates a public key distribution mechanism
@@ -18,12 +18,12 @@ func GetRPK(sid []byte) mppj.PublicKeyTuple {
 
 func PrintStats(s api.NetStats, total, active time.Duration) {
 	var stats string
-	switch config.LogNetworkStats {
-	case config.None:
+	switch LogNetworkStats {
+	case None:
 		// do nothing
-	case config.StringFormat:
+	case StringFormat:
 		stats = fmt.Sprintf("%s, total time: %v, active time: %v", s, total, active)
-	case config.JsonFormat:
+	case JsonFormat:
 		json, err := json.Marshal(struct {
 			Sent   uint64        `json:"data_sent"`
 			Recv   uint64        `json:"data_recv"`

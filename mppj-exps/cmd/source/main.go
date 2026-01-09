@@ -7,15 +7,15 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"mppj"
-	"mppj/api"
-	"mppj/api/pb"
-	"mppj/cmd/common"
-	"mppj/cmd/config"
+	"mppj-exps/cmd"
 	"os"
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/hpicrypto/mppj"
+	"github.com/hpicrypto/mppj/api"
+	"github.com/hpicrypto/mppj/api/pb"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -25,7 +25,7 @@ const MAX_VAL_LEN = 30
 
 var (
 	nodeID     = flag.String("id", "", "the id of the source")
-	helperAddr = flag.String("helper_address", fmt.Sprintf(":%d", config.DEFAULT_PORT), "the address of the helper node")
+	helperAddr = flag.String("helper_address", fmt.Sprintf(":%d", cmd.DEFAULT_PORT), "the address of the helper node")
 	input      = flag.String("input", "stdin", "the input CSV file (or 'stdin' for standard input)")
 	nCPU       = flag.Int("n_cpu", 0, "number of CPUs to use (default is all available CPUs)")
 )
@@ -66,8 +66,8 @@ func main() {
 	defer helperConn.Close()
 	helperClient := pb.NewMPPJHelperClient(helperConn)
 
-	rpk := common.GetRPK(config.SessionID)
-	ds := mppj.NewDataSource(config.SessionID, rpk)
+	rpk := cmd.GetRPK(cmd.SessionID)
+	ds := mppj.NewDataSource(cmd.SessionID, rpk)
 
 	start := time.Now()
 
@@ -103,7 +103,7 @@ func main() {
 	log.Printf("done sending %d rows", len(*table))
 	total := time.Since(start)
 	active := time.Since(startActive)
-	common.PrintStats(statsHandler.GetStats(), total, active)
+	cmd.PrintStats(statsHandler.GetStats(), total, active)
 }
 
 func readFile(filename string) (*mppj.TablePlain, error) {

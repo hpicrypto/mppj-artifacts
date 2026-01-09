@@ -1,9 +1,6 @@
-.PHONY: mppj-docker mppj-exps mpspdz-exps all
+.PHONY: mppj-exps mpspdz-exps all
 
-mppj-docker:
-	cd mppj-go && make docker
-
-mppj-exps: mppj-docker
+mppj-exps:
 	cd mppj-exps && make docker
 
 mpspdz-exps:

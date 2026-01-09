@@ -5,14 +5,15 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"mppj"
-	"mppj/api"
-	"mppj/api/pb"
-	"mppj/cmd/common"
-	"mppj/cmd/config"
+	"mppj-exps/cmd"
 	"net"
 	"sync"
 	"time"
+
+	"github.com/hpicrypto/mppj/api"
+	"github.com/hpicrypto/mppj/api/pb"
+
+	"github.com/hpicrypto/mppj"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -23,7 +24,7 @@ import (
 var sources mppj.SourceList
 var (
 	nodeId   = flag.String("id", "", "the id of the node")
-	bindAddr = flag.String("bind_address", fmt.Sprintf(":%d", config.DEFAULT_PORT), "the address to bind")
+	bindAddr = flag.String("bind_address", fmt.Sprintf(":%d", cmd.DEFAULT_PORT), "the address to bind")
 	nRows    = flag.Int("n_rows", 0, "the number of rows per source")
 )
 
@@ -49,9 +50,9 @@ type mppjHelperServer struct {
 
 func newHelperServer() *mppjHelperServer {
 
-	h := mppj.NewHelper(config.SessionID, sources, *nRows)
+	h := mppj.NewHelper(cmd.SessionID, sources, *nRows)
 
-	rpk := common.GetRPK(config.SessionID)
+	rpk := cmd.GetRPK(cmd.SessionID)
 
 	srv := &mppjHelperServer{
 		incomingEncRows: make(chan mppj.ConvertRowTask),
@@ -203,7 +204,7 @@ func main() {
 	log.Println("done processing")
 	total := time.Since(start)
 	active := time.Since(startActive)
-	common.PrintStats(statsHandler.GetStats(), total, active)
+	cmd.PrintStats(statsHandler.GetStats(), total, active)
 	<-time.After(time.Second) // leaves some time for streams to close as GracefulStop seems insufficient
 	log.Println("shutting down")
 	grpcServer.GracefulStop()

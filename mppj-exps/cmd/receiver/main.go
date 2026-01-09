@@ -7,15 +7,15 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"mppj"
-	"mppj/api"
-	"mppj/api/pb"
-	"mppj/cmd/common"
-	"mppj/cmd/config"
+	"mppj-exps/cmd"
 	"os"
 	"runtime"
 	"sync"
 	"time"
+
+	"github.com/hpicrypto/mppj"
+	"github.com/hpicrypto/mppj/api"
+	"github.com/hpicrypto/mppj/api/pb"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -25,7 +25,7 @@ var sources mppj.SourceList
 
 var (
 	nodeID     = flag.String("id", "", "the id of the source")
-	helperAddr = flag.String("helper_address", fmt.Sprintf(":%d", config.DEFAULT_PORT), "the address of the helper node")
+	helperAddr = flag.String("helper_address", fmt.Sprintf(":%d", cmd.DEFAULT_PORT), "the address of the helper node")
 )
 
 func init() {
@@ -57,9 +57,9 @@ func main() {
 	defer helperConn.Close()
 	helperClient := pb.NewMPPJHelperClient(helperConn)
 
-	rsk, rpk := mppj.GetTestKeys(config.SessionID) // in real usage, keys would be randomly generated and
+	rsk, rpk := mppj.GetTestKeys(cmd.SessionID) // in real usage, keys would be randomly generated and
 
-	r := mppj.NewReceiverWithKeys(config.SessionID, sources, rsk, rpk)
+	r := mppj.NewReceiverWithKeys(cmd.SessionID, sources, rsk, rpk)
 
 	var start, startActive time.Time
 	start = time.Now() // measured time from helper connect
@@ -147,7 +147,7 @@ func main() {
 	}
 
 	log.Printf("Result has %d rows", res.Len())
-	common.PrintStats(statsHandler.GetStats(), time.Since(start), time.Since(startActive))
+	cmd.PrintStats(statsHandler.GetStats(), time.Since(start), time.Since(startActive))
 
 	w := csv.NewWriter(os.Stdout)
 	if err := res.WriteTo(w); err != nil {

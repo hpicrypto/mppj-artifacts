@@ -1,4 +1,4 @@
-package config
+package cmd
 
 const DEFAULT_PORT = 40000
 

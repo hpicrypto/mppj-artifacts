@@ -271,7 +271,7 @@ experiment grid to these figures ($n \in [2,6]$ and $m \in \{1353, 1700, 19735, 
 $m$ corresponds to the sizes of the freely available databases), and we restrict the
 comparison to the network cost (which is hardware-independent). 
 
-The results are reported in Table 2, as the percentage of communication that DH-MPPJ
+The results are reported in Table 3, as the percentage of communication that DH-MPPJ
 requires compared to that of IDCloak. We observe that DH-MPPJ consistently outperforms
 IDCloak, and that the gap increases with the number of parties.
 
@@ -320,7 +320,7 @@ parameterized through various constants and runtime arguments:
  default, it provides three grids:
     1. `light` is a reduced experiment grid for $(n,m). \in \{2,3\}\times\{1353, 1700\}$
  and only one repetition per experiment.
-    2. `full` is the full experiment grid of Table 2, i.e., 
+    2. `full` is the full experiment grid of Table 3, i.e., 
  $(n,m). \in \{2,3\}\times\{1353, 1700, 19735, 45211, 253680\}$ and does three
  repetitions per experiment.
     3. `genmpc_comp` is the experiment grid for Experiment 2.

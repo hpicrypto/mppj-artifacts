@@ -6,8 +6,8 @@ utilities to run the performance benchmarks. The main MPPJ protocol implementati
 imported from [`github.com/hpicrypto/mppj`](https://github.com/hpicrypto/mppj).
 
 For a complete procedure to run the experiments and reproduce the paper's results, see
-[ARTIFACT-APPENDIX.md]. For more information on the protocol's implementation and its
-most up-to-date version, see
+[ARTIFACT-APPENDIX.md](ARTIFACT-APPENDIX.md). For more information on the protocol's
+implementation and its most up-to-date version, see
 [https://github.com/hpicrypto/mppj](https://github.com/hpicrypto/mppj).  
 
 ## Directory structure

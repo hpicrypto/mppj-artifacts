@@ -67,11 +67,16 @@ func main() {
 	helperClient := pb.NewMPPJHelperClient(helperConn)
 
 	rpk := cmd.GetRPK(cmd.SessionID)
-	ds := mppj.NewDataSource(cmd.SessionID, rpk)
+	sess, err := mppj.NewSessionWithID(cmd.SessionID, []mppj.PartyID{"not", "used", "yet"}, "helper", mppj.PartyID(*nodeID), rpk)
+	if err != nil {
+		log.Fatalf("Failed to create session: %v", err)
+	}
+
+	ds := mppj.NewDataSource(sess)
 
 	start := time.Now()
 
-	ctx := mppj.SourceIDToOutgoingContext(context.Background(), mppj.SourceID(*nodeID))
+	ctx := mppj.SourceIDToOutgoingContext(context.Background(), mppj.PartyID(*nodeID))
 	stream, err := helperClient.PushRows(ctx)
 	if err != nil {
 		log.Fatalf("Failed to create stream: %v", err)
@@ -79,7 +84,7 @@ func main() {
 
 	log.Printf("preparing and sending %d rows using %d CPU(s)...", len(*table), *nCPU)
 
-	encRows, err := ds.PrepareStream(rpk, *table, *nCPU)
+	encRows, err := ds.PrepareStream(*table, *nCPU)
 	if err != nil {
 		log.Fatalf("Failed to prepare stream: %v", err)
 	}

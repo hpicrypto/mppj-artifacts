@@ -3,11 +3,12 @@
 This repository hosts the artifact for the paper "Multi-Party Private Join" by Anja Lehmann,
 Christian Mouchet and Andrey Sidorenko, PETS 2026. This artifact is a set of scripts and
 utilities to run the performance benchmarks. The main MPPJ protocol implementation is
-imported from [https://github.com/hpicrypto/mppj].
+imported from [`github.com/hpicrypto/mppj`](https://github.com/hpicrypto/mppj).
 
 For a complete procedure to run the experiments and reproduce the paper's results, see
 [ARTIFACT-APPENDIX.md]. For more information on the protocol's implementation and its
-most up-to-date version, see [https://github.com/hpicrypto/mppj]. 
+most up-to-date version, see
+[https://github.com/hpicrypto/mppj](https://github.com/hpicrypto/mppj).  
 
 ## Directory structure
 

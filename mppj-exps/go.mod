@@ -3,7 +3,7 @@ module mppj-exps
 go 1.24.0
 
 require (
-	github.com/hpicrypto/mppj v0.0.0-20260109132523-2a58092a8273
+	github.com/hpicrypto/mppj v0.1.1-0.20260115135017-475236103623
 	google.golang.org/grpc v1.78.0
 )
 

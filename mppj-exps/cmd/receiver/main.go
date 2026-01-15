@@ -58,8 +58,12 @@ func main() {
 	helperClient := pb.NewMPPJHelperClient(helperConn)
 
 	rsk, rpk := mppj.GetTestKeys(cmd.SessionID) // in real usage, keys would be randomly generated and
+	sess, err := mppj.NewSessionWithID(cmd.SessionID, sources, "", mppj.PartyID(*nodeID), rpk)
+	if err != nil {
+		log.Fatalf("Failed to create session: %v", err)
+	}
 
-	r := mppj.NewReceiverWithKeys(cmd.SessionID, sources, rsk, rpk)
+	r := mppj.NewReceiver(sess, rsk)
 
 	var start, startActive time.Time
 	start = time.Now() // measured time from helper connect

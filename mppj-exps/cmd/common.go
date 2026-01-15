@@ -11,7 +11,7 @@ import (
 )
 
 // this function simulates a public key distribution mechanism
-func GetRPK(sid []byte) mppj.PublicKeyTuple {
+func GetRPK(sid []byte) mppj.PublicKey {
 	_, rpk := mppj.GetTestKeys(sid)
 	return rpk
 }

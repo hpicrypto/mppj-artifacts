@@ -39,7 +39,7 @@ type mppjHelperServer struct {
 
 	convTables chan mppj.EncTableWithHint
 
-	expected map[mppj.SourceID]mppj.TableIndex
+	expected map[mppj.PartyID]struct{}
 	mu       sync.Mutex
 	once     sync.Once
 
@@ -50,25 +50,30 @@ type mppjHelperServer struct {
 
 func newHelperServer() *mppjHelperServer {
 
-	h := mppj.NewHelper(cmd.SessionID, sources, *nRows)
+	sess, err := mppj.NewSessionWithID(cmd.SessionID, sources, "", mppj.PartyID(*nodeId), mppj.PublicKey{})
+	if err != nil {
+		log.Fatalf("Failed to create session: %v", err)
+	}
+
+	h := mppj.NewHelper(sess)
 
 	rpk := cmd.GetRPK(cmd.SessionID)
 
 	srv := &mppjHelperServer{
 		incomingEncRows: make(chan mppj.ConvertRowTask),
 		convTables:      make(chan mppj.EncTableWithHint, 1),
-		expected:        make(map[mppj.SourceID]mppj.TableIndex, len(sources)),
+		expected:        make(map[mppj.PartyID]struct{}, len(sources)),
 		start:           make(chan struct{}),
 		stop:            make(chan struct{}),
 	}
 
-	for i, id := range sources {
-		srv.expected[id] = mppj.TableIndex(i)
+	for _, id := range sources {
+		srv.expected[id] = struct{}{}
 	}
 
 	go func() {
 		log.Printf("waiting for %d sources: %v", len(srv.expected), sources)
-		convTables, err := h.ConvertTablesStream(rpk, srv.incomingEncRows)
+		convTables, err := h.ConvertStream(rpk, srv.incomingEncRows)
 		if err != nil {
 			log.Fatalf("failed to convert tables: %v", err)
 		}
@@ -87,7 +92,7 @@ func (s *mppjHelperServer) PushRows(stream pb.MPPJHelper_PushRowsServer) error {
 	}
 
 	s.mu.Lock()
-	tindex, ok := s.expected[sourceID] // TODO: this doesn't check for multiple connections from the same source
+	_, ok = s.expected[sourceID] // TODO: this doesn't check for multiple connections from the same source
 	if !ok {
 		s.mu.Unlock()
 		return status.Error(codes.NotFound, "unexpected source ID")
@@ -110,7 +115,7 @@ func (s *mppjHelperServer) PushRows(stream pb.MPPJHelper_PushRowsServer) error {
 		if err != nil {
 			return err
 		}
-		s.incomingEncRows <- mppj.ConvertRowTask{EncRowMsg: encRow, TableIndex: tindex}
+		s.incomingEncRows <- mppj.ConvertRowTask{EncRowMsg: encRow, SourceID: sourceID}
 		rc++
 	}
 
